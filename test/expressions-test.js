@@ -20,7 +20,7 @@ describe('Expressions', () => {
       })).to.be.undefined;
     });
 
-    it('misspelled varailbes returns undefined', () => {
+    it('misspelled varailbes (sic) returns undefined', () => {
       expect(expressions.resolveExpression('${varailbes.input}', {
         variables: {
           input: 1,
@@ -148,7 +148,7 @@ describe('Expressions', () => {
       })).to.equal('200');
     });
 
-    it('expression with argument adressing variables returns value', () => {
+    it('expression with argument addressing variables returns value', () => {
       expect(expressions.resolveExpression('${services.get(variables.input[0])}', {
         variables: {
           input: [200],
@@ -161,7 +161,7 @@ describe('Expressions', () => {
       })).to.equal(200);
     });
 
-    it('expression with arguments adressing variables returns value', () => {
+    it('expression with arguments addressing variables returns value', () => {
       expect(expressions.resolveExpression('${services.get(variables.input[0],variables.add)}', {
         variables: {
           input: [200],

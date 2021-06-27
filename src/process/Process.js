@@ -71,6 +71,7 @@ export function Process(processDef, context) {
 
   const {broker, on, once, waitFor} = ProcessBroker(processApi);
 
+  processApi.broker = broker;
   processApi.on = on;
   processApi.once = once;
   processApi.waitFor = waitFor;
@@ -78,16 +79,7 @@ export function Process(processDef, context) {
   const runQ = broker.getQueue('run-q');
   const executionQ = broker.getQueue('execution-q');
 
-  Object.defineProperty(processApi, 'broker', {
-    enumerable: true,
-    get: () => broker,
-  });
-
-  const extensions = context.loadExtensions(processApi);
-  Object.defineProperty(processApi, 'extensions', {
-    enumerable: true,
-    get: () => extensions,
-  });
+  processApi.extensions = context.loadExtensions(processApi);
 
   return processApi;
 

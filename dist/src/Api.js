@@ -51,40 +51,7 @@ function Api(pfx, broker, sourceMessage, environment) {
   this.environment = environment || broker.owner.environment;
   this.fields = apiMessage.fields;
   this.content = apiContent;
-  this.messageProperties = apiMessage.properties; // const executionId = apiContent.executionId;
-  // const owner = broker.owner;
-  // environment = environment || broker.owner.environment;
-  // return {
-  //   id,
-  //   type,
-  //   name,
-  //   executionId,
-  //   environment,
-  //   fields: apiMessage.fields,
-  //   content: apiContent,
-  //   messageProperties: apiMessage.properties,
-  //   get owner() {
-  //     return owner;
-  //   },
-  //   cancel(message, options) {
-  //     sendApiMessage('cancel', {message}, options);
-  //   },
-  //   discard() {
-  //     sendApiMessage('discard');
-  //   },
-  //   signal(message, options) {
-  //     sendApiMessage('signal', {message}, options);
-  //   },
-  //   stop() {
-  //     sendApiMessage('stop');
-  //   },
-  //   resolveExpression(expression) {
-  //     return environment.resolveExpression(expression, apiMessage, broker.owner);
-  //   },
-  //   sendApiMessage,
-  //   createMessage,
-  //   getPostponed,
-  // };
+  this.messageProperties = apiMessage.properties;
 }
 
 Object.defineProperty(Api.prototype, 'owner', {

@@ -53,6 +53,9 @@ export function Definition(context, options) {
     get environment() {
       return environment;
     },
+    get stopped() {
+      return execution && execution.stopped;
+    },
     run,
     getApi,
     getState,
@@ -73,6 +76,7 @@ export function Definition(context, options) {
 
   const {broker, on, once, waitFor, emit, emitFatal} = DefinitionBroker(definitionApi, onBrokerReturn);
 
+  definitionApi.broker = broker;
   definitionApi.on = on;
   definitionApi.once = once;
   definitionApi.waitFor = waitFor;
@@ -82,15 +86,15 @@ export function Definition(context, options) {
   const runQ = broker.getQueue('run-q');
   const executionQ = broker.getQueue('execution-q');
 
-  Object.defineProperty(definitionApi, 'broker', {
-    enumerable: true,
-    get: () => broker,
-  });
+  // Object.defineProperty(definitionApi, 'broker', {
+  //   enumerable: true,
+  //   get: () => broker,
+  // });
 
-  Object.defineProperty(definitionApi, 'stopped', {
-    enumerable: true,
-    get: () => execution && execution.stopped,
-  });
+  // Object.defineProperty(definitionApi, 'stopped', {
+  //   enumerable: true,
+  //   get: () => execution && execution.stopped,
+  // });
 
   return definitionApi;
 

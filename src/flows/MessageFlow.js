@@ -37,15 +37,11 @@ export default function MessageFlow(flowDef, context) {
 
   const {broker, on, once, emit, waitFor} = MessageFlowBroker(flowApi);
 
+  flowApi.broker = broker;
   flowApi.on = on;
   flowApi.once = once;
   flowApi.emit = emit;
   flowApi.waitFor = waitFor;
-
-  Object.defineProperty(flowApi, 'broker', {
-    enumerable: true,
-    get: () => broker,
-  });
 
   return flowApi;
 

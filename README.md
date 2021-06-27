@@ -8,6 +8,8 @@ Isomorphic JavaScript BPMN 2.0 workflow elements suitable for bundling into fron
 - [Examples](/docs/Examples.md)
 - [Handle extensions](/docs/Extension.md)
 - [Write your own behaviour](/docs/Extend.md)
+- [Expressions interface](/docs/Expression.md)
+- [Script interface](/docs/Script.md)
 
 # Supported elements
 
@@ -47,6 +49,7 @@ The following elements are tested and supported.
 - [ParallelGateway](/docs/ParallelGateway.md)
 - ReceiveTask
 - ScriptTask
+  - [JavaScript](/docs/Scripts.md)
 - [SequenceFlow](/docs/SequenceFlow.md)
 - ServiceImplementation: ServiceTask implementation attribute behaviour
 - [ServiceTask](/docs/ServiceTask.md)

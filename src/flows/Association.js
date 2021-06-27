@@ -38,14 +38,10 @@ export default function Association(associationDef, {environment}) {
 
   const {broker, on, once, waitFor} = EventBroker(associationApi, {prefix: 'association', durable: true, autoDelete: false});
 
+  associationApi.broker = broker;
   associationApi.on = on;
   associationApi.once = once;
   associationApi.waitFor = waitFor;
-
-  Object.defineProperty(associationApi, 'broker', {
-    enumerable: true,
-    get: () => broker,
-  });
 
   logger.debug(`<${id}> init, <${sourceId}> -> <${targetId}>`);
 

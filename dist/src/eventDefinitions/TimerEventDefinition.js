@@ -39,6 +39,11 @@ function TimerEventDefinition(activity, eventDefinition) {
   let timerRef;
   const source = {
     type,
+
+    get timer() {
+      return timerRef;
+    },
+
     ...foundTimers,
     execute,
 
@@ -47,12 +52,6 @@ function TimerEventDefinition(activity, eventDefinition) {
     }
 
   };
-  Object.defineProperty(source, 'timer', {
-    get() {
-      return timerRef;
-    }
-
-  });
   return source;
 
   function execute(executeMessage) {

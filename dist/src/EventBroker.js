@@ -84,7 +84,7 @@ function ExecutionBroker(brokerOwner, prefix, onBrokerReturn) {
 }
 
 function EventBroker(brokerOwner, options, onBrokerReturn) {
-  const broker = (0, _smqp.Broker)(brokerOwner);
+  const broker = new _smqp.Broker(brokerOwner);
   const pfx = options.prefix;
   broker.assertExchange('event', 'topic', options);
   broker.on('return', onBrokerReturn || onBrokerReturnFn);

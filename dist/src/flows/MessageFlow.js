@@ -60,14 +60,11 @@ function MessageFlow(flowDef, context) {
     emit,
     waitFor
   } = (0, _EventBroker.MessageFlowBroker)(flowApi);
+  flowApi.broker = broker;
   flowApi.on = on;
   flowApi.once = once;
   flowApi.emit = emit;
   flowApi.waitFor = waitFor;
-  Object.defineProperty(flowApi, 'broker', {
-    enumerable: true,
-    get: () => broker
-  });
   return flowApi;
 
   function onSourceEnd({

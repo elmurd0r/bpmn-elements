@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = SequenceFlow;
+exports.default = void 0;
 
 var _ExecutionScope = _interopRequireDefault(require("../activity/ExecutionScope"));
 
@@ -17,9 +17,22 @@ var _Api = require("../Api");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var _default = SequenceFlow;
+exports.default = _default;
+const brokerSymbol = Symbol.for('broker');
+const eventBrokerSymbol = Symbol.for('eventBroker');
+const countersSymbol = Symbol.for('counters');
+const loopedSymbol = Symbol.for('loopedSymbol');
+
 function SequenceFlow(flowDef, {
   environment
 }) {
+  if (!(this instanceof SequenceFlow)) {
+    return new SequenceFlow(flowDef, {
+      environment
+    });
+  }
+
   const {
     id,
     type = 'sequenceflow',
@@ -32,225 +45,228 @@ function SequenceFlow(flowDef, {
   } = flowDef;
   const parent = (0, _messageHelper.cloneParent)(originalParent);
   const logger = environment.Logger(type.toLowerCase());
-  const flowBase = {
-    id,
-    type,
-    name,
-    parent,
-    behaviour,
-    sourceId,
-    targetId,
-    isDefault,
-    isSequenceFlow: true,
-    environment,
-    logger
-  };
-  environment.registerScript({ ...flowBase
-  });
-  let counters = {
+  this.id = id;
+  this.type = type;
+  this.name = name;
+  this.parent = parent;
+  this.behaviour = behaviour;
+  this.sourceId = sourceId;
+  this.targetId = targetId;
+  this.isDefault = isDefault;
+  this.isSequenceFlow = true;
+  this.environment = environment;
+  this.logger = logger;
+  environment.registerScript(this);
+  this[countersSymbol] = {
     looped: 0,
     take: 0,
     discard: 0
   };
-  const flowApi = { ...flowBase,
-
-    get counters() {
-      return { ...counters
-      };
-    },
-
-    discard,
-    evaluateCondition,
-    getApi,
-    getCondition,
-    getState,
-    recover,
-    shake,
-    stop,
-    take
-  };
-  const {
-    broker,
-    on,
-    once,
-    waitFor,
-    emitFatal
-  } = (0, _EventBroker.EventBroker)(flowApi, {
+  const eventBroker = this[eventBrokerSymbol] = (0, _EventBroker.EventBroker)(this, {
     prefix: 'flow',
     durable: true,
     autoDelete: false
   });
-  flowApi.on = on;
-  flowApi.once = once;
-  flowApi.waitFor = waitFor;
-  Object.defineProperty(flowApi, 'broker', {
-    enumerable: true,
-    get: () => broker
-  });
+  this[brokerSymbol] = eventBroker.broker;
   logger.debug(`<${id}> init, <${sourceId}> -> <${targetId}>`);
-  return flowApi;
+}
 
-  function take(content = {}) {
-    flowApi.looped = undefined;
-    const {
-      sequenceId
-    } = content;
-    logger.debug(`<${sequenceId} (${id})> take, target <${targetId}>`);
-    ++counters.take;
-    publishEvent('take', content);
-    return true;
+Object.defineProperty(SequenceFlow.prototype, 'broker', {
+  enumerable: true,
+
+  get() {
+    return this[brokerSymbol];
   }
 
-  function discard(content = {}) {
-    const {
-      sequenceId = (0, _shared.getUniqueId)(id)
-    } = content;
-    const discardSequence = content.discardSequence = (content.discardSequence || []).slice();
+});
+Object.defineProperty(SequenceFlow.prototype, 'counters', {
+  enumerable: true,
 
-    if (discardSequence.indexOf(targetId) > -1) {
-      ++counters.looped;
-      logger.debug(`<${id}> discard loop detected <${sourceId}> -> <${targetId}>. Stop.`);
-      return publishEvent('looped', content);
+  get() {
+    return { ...this[countersSymbol]
+    };
+  }
+
+});
+
+SequenceFlow.prototype.on = function on(...args) {
+  return this[eventBrokerSymbol].on(...args);
+};
+
+SequenceFlow.prototype.once = function once(...args) {
+  return this[eventBrokerSymbol].once(...args);
+};
+
+SequenceFlow.prototype.waitFor = function waitFor(...args) {
+  return this[eventBrokerSymbol].waitFor(...args);
+};
+
+SequenceFlow.prototype.emitFatal = function emitFatal(...args) {
+  return this[eventBrokerSymbol].emitFatal(...args);
+};
+
+SequenceFlow.prototype.take = function take(content = {}) {
+  this[loopedSymbol] = undefined;
+  const {
+    sequenceId
+  } = content;
+  this.logger.debug(`<${sequenceId} (${this.id})> take, target <${this.targetId}>`);
+  ++this[countersSymbol].take;
+  this.publishEvent('take', content);
+  return true;
+};
+
+SequenceFlow.prototype.discard = function discard(content = {}) {
+  const {
+    sequenceId = (0, _shared.getUniqueId)(this.id)
+  } = content;
+  const discardSequence = content.discardSequence = (content.discardSequence || []).slice();
+  const counters = this[countersSymbol];
+
+  if (discardSequence.indexOf(this.targetId) > -1) {
+    ++this[countersSymbol].looped;
+    this.logger.debug(`<${this.id}> discard loop detected <${this.sourceId}> -> <${this.targetId}>. Stop.`);
+    return this.publishEvent('looped', content);
+  }
+
+  discardSequence.push(this.sourceId);
+  this.logger.debug(`<${sequenceId} (${this.id})> discard, target <${this.targetId}>`);
+  ++counters.discard;
+  this.publishEvent('discard', content);
+};
+
+SequenceFlow.prototype.publishEvent = function publishEvent(action, content) {
+  const eventContent = this.createMessage({
+    action,
+    ...content
+  });
+  this[brokerSymbol].publish('event', `flow.${action}`, eventContent, {
+    type: action
+  });
+};
+
+SequenceFlow.prototype.createMessage = function createMessage(override) {
+  return { ...override,
+    id: this.id,
+    type: this.type,
+    name: this.name,
+    sourceId: this.sourceId,
+    targetId: this.targetId,
+    isSequenceFlow: true,
+    isDefault: this.isDefault,
+    parent: (0, _messageHelper.cloneParent)(this.parent)
+  };
+};
+
+SequenceFlow.prototype.getState = function getState() {
+  const result = {
+    id: this.id,
+    type: this.type,
+    name: this.name,
+    sourceId: this.sourceId,
+    targetId: this.targetId,
+    isDefault: this.isDefault,
+    counters: { ...this[countersSymbol]
     }
+  };
+  result.broker = this[brokerSymbol].getState();
+  return result;
+};
 
-    discardSequence.push(sourceId);
-    logger.debug(`<${sequenceId} (${id})> discard, target <${targetId}>`);
-    ++counters.discard;
-    publishEvent('discard', content);
-  }
+SequenceFlow.prototype.recover = function recover(state) {
+  this[countersSymbol] = { ...this[countersSymbol],
+    ...state.counters
+  };
+  this[brokerSymbol].recover(state.broker);
+};
 
-  function publishEvent(action, content) {
-    const eventContent = createMessage({
-      action,
-      ...content
-    });
-    broker.publish('event', `flow.${action}`, eventContent, {
-      type: action
-    });
-  }
+SequenceFlow.prototype.getApi = function getApi(message) {
+  return (0, _Api.FlowApi)(this[brokerSymbol], message || {
+    content: this.createMessage()
+  });
+};
 
-  function createMessage(override) {
-    return { ...override,
-      id,
-      type,
-      name,
-      sourceId,
-      targetId,
-      isSequenceFlow: true,
-      isDefault,
-      parent: (0, _messageHelper.cloneParent)(parent)
-    };
-  }
+SequenceFlow.prototype.stop = function stop() {
+  this[brokerSymbol].stop();
+};
 
-  function getState() {
-    const result = {
-      id,
-      type,
-      name,
-      sourceId,
-      targetId,
-      isDefault,
-      counters: { ...counters
-      }
-    };
-    result.broker = broker.getState();
-    return result;
-  }
+SequenceFlow.prototype.shake = function shake(message) {
+  const content = (0, _messageHelper.cloneContent)(message.content);
+  content.sequence = content.sequence || [];
+  content.sequence.push({
+    id: this.id,
+    type: this.type,
+    isSequenceFlow: true,
+    targetId: this.targetId
+  });
+  const broker = this[brokerSymbol];
+  if (content.id === this.targetId) return broker.publish('event', 'flow.shake.loop', content, {
+    persistent: false,
+    type: 'shake'
+  });
 
-  function recover(state) {
-    counters = { ...counters,
-      ...state.counters
-    };
-    broker.recover(state.broker);
-  }
-
-  function getApi(message) {
-    return (0, _Api.FlowApi)(broker, message || {
-      content: createMessage()
-    });
-  }
-
-  function stop() {
-    broker.stop();
-  }
-
-  function shake(message) {
-    const content = (0, _messageHelper.cloneContent)(message.content);
-    content.sequence = content.sequence || [];
-    content.sequence.push({
-      id,
-      type,
-      isSequenceFlow: true,
-      targetId
-    });
-    if (content.id === targetId) return broker.publish('event', 'flow.shake.loop', content, {
+  for (const s of message.content.sequence) {
+    if (s.id === this.id) return broker.publish('event', 'flow.shake.loop', content, {
       persistent: false,
       type: 'shake'
     });
-
-    for (const s of message.content.sequence) {
-      if (s.id === id) return broker.publish('event', 'flow.shake.loop', content, {
-        persistent: false,
-        type: 'shake'
-      });
-    }
-
-    broker.publish('event', 'flow.shake', content, {
-      persistent: false,
-      type: 'shake'
-    });
   }
 
-  function evaluateCondition(message, callback) {
-    const condition = getCondition(message);
-    if (!condition) return callback(null, true);
-    return condition.execute(message, callback);
+  broker.publish('event', 'flow.shake', content, {
+    persistent: false,
+    type: 'shake'
+  });
+};
+
+SequenceFlow.prototype.evaluateCondition = function evaluateCondition(message, callback) {
+  const condition = this.getCondition(message);
+  if (!condition) return callback(null, true);
+  return condition.execute(message, callback);
+};
+
+SequenceFlow.prototype.getCondition = function getCondition() {
+  const conditionExpression = this.behaviour.conditionExpression;
+  if (!conditionExpression) return null;
+  const {
+    language
+  } = conditionExpression;
+  const script = this.environment.getScript(language, this);
+
+  if (script) {
+    return ScriptCondition(this, script, language);
   }
 
-  function getCondition() {
-    const conditionExpression = behaviour.conditionExpression;
-    if (!conditionExpression) return null;
-    const {
-      language
-    } = conditionExpression;
-    const script = environment.getScript(language, flowApi);
-
-    if (script) {
-      return ScriptCondition(script, language);
-    }
-
-    if (!conditionExpression.body) {
-      const msg = language ? `Condition expression script ${language} is unsupported or was not registered` : 'Condition expression without body is unsupported';
-      return emitFatal(new Error(msg), createMessage());
-    }
-
-    return ExpressionCondition(conditionExpression.body);
+  if (!conditionExpression.body) {
+    const msg = language ? `Condition expression script ${language} is unsupported or was not registered` : 'Condition expression without body is unsupported';
+    return this.emitFatal(new Error(msg), this.createMessage());
   }
 
-  function ScriptCondition(script, language) {
-    return {
-      language,
+  return ExpressionCondition(this, conditionExpression.body);
+};
 
-      execute(message, callback) {
-        try {
-          return script.execute((0, _ExecutionScope.default)(flowApi, message), callback);
-        } catch (err) {
-          if (!callback) throw err;
-          logger.error(`<${id}>`, err);
-          callback(err);
-        }
+function ScriptCondition(flowApi, script, language) {
+  return {
+    language,
+
+    execute(message, callback) {
+      try {
+        return script.execute((0, _ExecutionScope.default)(flowApi, message), callback);
+      } catch (err) {
+        if (!callback) throw err;
+        flowApi.logger.error(`<${flowApi.id}>`, err);
+        callback(err);
       }
+    }
 
-    };
-  }
+  };
+}
 
-  function ExpressionCondition(expression) {
-    return {
-      execute: (message, callback) => {
-        const result = environment.resolveExpression(expression, createMessage(message));
-        if (callback) return callback(null, result);
-        return result;
-      }
-    };
-  }
+function ExpressionCondition(flowApi, expression) {
+  return {
+    execute: (message, callback) => {
+      const result = flowApi.environment.resolveExpression(expression, flowApi.createMessage(message));
+      if (callback) return callback(null, result);
+      return result;
+    }
+  };
 }

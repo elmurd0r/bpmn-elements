@@ -77,6 +77,10 @@ function Definition(context, options) {
       return environment;
     },
 
+    get stopped() {
+      return execution && execution.stopped;
+    },
+
     run,
     getApi,
     getState,
@@ -102,21 +106,22 @@ function Definition(context, options) {
     emit,
     emitFatal
   } = (0, _EventBroker.DefinitionBroker)(definitionApi, onBrokerReturn);
+  definitionApi.broker = broker;
   definitionApi.on = on;
   definitionApi.once = once;
   definitionApi.waitFor = waitFor;
   definitionApi.emit = emit;
   definitionApi.emitFatal = emitFatal;
   const runQ = broker.getQueue('run-q');
-  const executionQ = broker.getQueue('execution-q');
-  Object.defineProperty(definitionApi, 'broker', {
-    enumerable: true,
-    get: () => broker
-  });
-  Object.defineProperty(definitionApi, 'stopped', {
-    enumerable: true,
-    get: () => execution && execution.stopped
-  });
+  const executionQ = broker.getQueue('execution-q'); // Object.defineProperty(definitionApi, 'broker', {
+  //   enumerable: true,
+  //   get: () => broker,
+  // });
+  // Object.defineProperty(definitionApi, 'stopped', {
+  //   enumerable: true,
+  //   get: () => execution && execution.stopped,
+  // });
+
   return definitionApi;
 
   function run(optionsOrCallback, optionalCallback) {

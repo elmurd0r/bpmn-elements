@@ -65,14 +65,8 @@ function Activity(Behaviour, activityDef, context) {
   const isEnd = outboundSequenceFlows.length === 0;
   const isParallelJoin = inboundSequenceFlows.length > 1 && isParallelGateway;
   const isMultiInstance = !!behaviour.loopCharacteristics;
-  let execution,
-      initExecutionId,
-      executionId,
-      stateMessage,
-      status,
-      stopped = false,
-      executeMessage,
-      consumingRunQ;
+  let execution, initExecutionId, executionId, stateMessage, status, executeMessage, consumingRunQ;
+  let stopped = false;
   const inboundTriggers = attachedToActivity ? [attachedToActivity] : inboundSequenceFlows.slice();
   const inboundJoinFlows = [];
   let counters = {
@@ -101,6 +95,10 @@ function Activity(Behaviour, activityDef, context) {
     get counters() {
       return { ...counters
       };
+    },
+
+    get execution() {
+      return execution;
     },
 
     get executionId() {
@@ -144,6 +142,7 @@ function Activity(Behaviour, activityDef, context) {
     waitFor,
     emitFatal
   } = (0, _EventBroker.ActivityBroker)(activityApi);
+  activityApi.broker = broker;
   activityApi.on = on;
   activityApi.once = once;
   activityApi.waitFor = waitFor;
@@ -180,25 +179,9 @@ function Activity(Behaviour, activityDef, context) {
     });
   }
 
-  Object.defineProperty(activityApi, 'broker', {
-    enumerable: true,
-    get: () => broker
-  });
-  Object.defineProperty(activityApi, 'execution', {
-    enumerable: true,
-    get: () => execution
-  });
   const ioSpecification = ioSpecificationDef && ioSpecificationDef.Behaviour(activityApi, ioSpecificationDef, context);
-  const loaedEventDefinitions = eventDefinitions && eventDefinitions.map(ed => ed.Behaviour(activityApi, ed, context));
-  Object.defineProperty(activityApi, 'eventDefinitions', {
-    enumerable: true,
-    get: () => loaedEventDefinitions
-  });
-  const extensions = context.loadExtensions(activityApi);
-  Object.defineProperty(activityApi, 'extensions', {
-    enumerable: true,
-    get: () => extensions
-  });
+  activityApi.eventDefinitions = eventDefinitions && eventDefinitions.map(ed => ed.Behaviour(activityApi, ed, context));
+  const extensions = activityApi.extensions = context.loadExtensions(activityApi);
   return activityApi;
 
   function init(initContent) {

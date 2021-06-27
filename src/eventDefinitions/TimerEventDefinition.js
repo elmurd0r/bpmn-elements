@@ -18,18 +18,15 @@ export default function TimerEventDefinition(activity, eventDefinition) {
 
   const source = {
     type,
+    get timer() {
+      return timerRef;
+    },
     ...foundTimers,
     execute,
     stop() {
       if (timerRef) timerRef = environment.timers.clearTimeout(timerRef);
     },
   };
-
-  Object.defineProperty(source, 'timer', {
-    get() {
-      return timerRef;
-    },
-  });
 
   return source;
 

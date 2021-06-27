@@ -71,7 +71,7 @@ Must return the following logging functions:
 - `error`
 - `warn`
 
-## Example implementation for nodejs
+Implementation example:
 
 ```js
 import Debug from 'debug';

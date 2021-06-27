@@ -66,13 +66,10 @@ function Association(associationDef, {
     durable: true,
     autoDelete: false
   });
+  associationApi.broker = broker;
   associationApi.on = on;
   associationApi.once = once;
   associationApi.waitFor = waitFor;
-  Object.defineProperty(associationApi, 'broker', {
-    enumerable: true,
-    get: () => broker
-  });
   logger.debug(`<${id}> init, <${sourceId}> -> <${targetId}>`);
   return associationApi;
 

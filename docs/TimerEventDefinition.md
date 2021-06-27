@@ -32,7 +32,7 @@ Object with `activity.timer` properties and some:
 
 # `timeDuration`
 
-Default support for ISO8601 duration. Will set a timer (`setTimeout`) for the duration and then complete when timed out. Invalid ISI8601 duration will stall the execution and wait for cancel.
+Default support for ISO8601 duration. Will set a timer (`setTimeout`) for the duration and then complete when timed out. Invalid ISO8601 duration will stall the execution and wait for cancel.
 
 # `timeDate`
 
