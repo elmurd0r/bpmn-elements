@@ -54,7 +54,7 @@ function ExecutionBroker(brokerOwner, prefix, onBrokerReturn) {
 }
 
 function EventBroker(brokerOwner, options, onBrokerReturn) {
-  const broker = Broker(brokerOwner);
+  const broker = new Broker(brokerOwner);
   const pfx = options.prefix;
 
   broker.assertExchange('event', 'topic', options);
