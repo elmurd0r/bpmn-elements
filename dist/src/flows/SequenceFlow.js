@@ -250,7 +250,7 @@ function ScriptCondition(flowApi, script, language) {
 
     execute(message, callback) {
       try {
-        return script.execute((0, _ExecutionScope.default)(flowApi, message), callback);
+        return script.execute(new _ExecutionScope.default(flowApi, message), callback);
       } catch (err) {
         if (!callback) throw err;
         flowApi.logger.error(`<${flowApi.id}>`, err);

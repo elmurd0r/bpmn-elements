@@ -17,7 +17,7 @@ export default function ServiceImplementation(activity) {
 
     if (typeof serviceFn !== 'function') return callback(new Error(`Implementation ${implementation} did not resolve to a function`));
 
-    serviceFn.call(activity, ExecutionScope(activity, executionMessage), (err, ...args) => {
+    serviceFn.call(activity, new ExecutionScope(activity, executionMessage), (err, ...args) => {
       callback(err, args);
     });
   }

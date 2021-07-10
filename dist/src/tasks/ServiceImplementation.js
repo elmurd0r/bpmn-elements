@@ -26,7 +26,7 @@ function ServiceImplementation(activity) {
   function execute(executionMessage, callback) {
     const serviceFn = environment.resolveExpression(implementation, executionMessage);
     if (typeof serviceFn !== 'function') return callback(new Error(`Implementation ${implementation} did not resolve to a function`));
-    serviceFn.call(activity, (0, _ExecutionScope.default)(activity, executionMessage), (err, ...args) => {
+    serviceFn.call(activity, new _ExecutionScope.default(activity, executionMessage), (err, ...args) => {
       callback(err, args);
     });
   }

@@ -22,7 +22,7 @@ describe('ExecutionScope', () => {
       },
     };
 
-    const scope = ExecutionScope(activity, message);
+    const scope = new ExecutionScope(activity, message);
     expect(scope).to.have.property('id', 'task1');
     expect(scope).to.have.property('type', 'task');
     expect(scope).to.have.property('logger', activity.logger);
@@ -63,7 +63,7 @@ describe('ExecutionScope', () => {
       },
     };
 
-    const scope = ExecutionScope(activity, message);
+    const scope = new ExecutionScope(activity, message);
     expect(scope.resolveExpression('${logger}')).to.equal(activity.logger);
     expect(scope.resolveExpression('${environment.variables.input}')).to.equal(1);
     expect(scope.resolveExpression('${properties.messageId}')).to.equal('m1');

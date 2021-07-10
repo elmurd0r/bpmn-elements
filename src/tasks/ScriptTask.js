@@ -36,7 +36,7 @@ export function ScriptTaskBehaviour(activity) {
       return emitFatal(new ActivityError(`Script format ${scriptFormat} is unsupported or was not registered for <${activity.id}>`, executeMessage), content);
     }
 
-    return script.execute(ExecutionScope(activity, executeMessage), scriptCallback);
+    return script.execute(new ExecutionScope(activity, executeMessage), scriptCallback);
 
     function scriptCallback(err, output) {
       if (err) {
