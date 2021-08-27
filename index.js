@@ -91,7 +91,7 @@ export {
   StandardLoopCharacteristics,
   StartEvent,
   SubProcess,
-  Task,
+  SignalTask as Task,
   TerminateEventDefinition,
   TimerEventDefinition,
   Transaction,
