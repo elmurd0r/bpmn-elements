@@ -1,7 +1,7 @@
 bpmn-elements
 =============
 
-[![Build Status](https://travis-ci.com/paed01/bpmn-elements.svg?branch=master)](https://travis-ci.com/paed01/bpmn-elements)[![Coverage Status](https://coveralls.io/repos/github/paed01/bpmn-elements/badge.svg?branch=master)](https://coveralls.io/github/paed01/bpmn-elements?branch=master)
+[![Build Status](https://app.travis-ci.com/paed01/bpmn-elements.svg?branch=master)](https://app.travis-ci.com/paed01/bpmn-elements)[![Coverage Status](https://coveralls.io/repos/github/paed01/bpmn-elements/badge.svg?branch=master)](https://coveralls.io/github/paed01/bpmn-elements?branch=master)
 
 Isomorphic JavaScript BPMN 2.0 workflow elements suitable for bundling into frontend script or just required into your nodejs project.
 
@@ -21,7 +21,9 @@ The following elements are tested and supported.
 - ConditionalEventDefinition
 - CompensateEventDefinition
   - compensate by outbound Association
-- DataObject
+- [DataObject](/docs/BpmnIO.md)
+- [DataStore](/docs/BpmnIO.md)
+- [DataStoreReference](/docs/BpmnIO.md)
 - EndEvent
 - Error
 - ErrorEventDefinition
@@ -35,7 +37,7 @@ The following elements are tested and supported.
 - InclusiveGateway
 - IntermediateCatchEvent
 - IntermediateThrowEvent
-- IoSpecification
+- [InputOutputSpecification](/docs/BpmnIO.md)
 - LinkEventDefinition
   - throw
   - catch
@@ -45,6 +47,7 @@ The following elements are tested and supported.
 - MessageFlow
 - [MultiInstanceLoopCharacteristics](/docs/LoopCharacteristics.md)
 - [ParallelGateway](/docs/ParallelGateway.md)
+- [Property](/docs/BpmnIO.md)
 - ReceiveTask
 - ScriptTask
 - [SequenceFlow](/docs/SequenceFlow.md)
